@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Static - {{ SITENAME }}{% endblock %}
+
+{% block breadcrumbs %}
+    {% if DISPLAY_BREADCRUMBS %}
+    <ol class="breadcrumb">
+        <li><a href="{{ SITEURL }}" title="{{ SITENAME }}"><i class="fa fa-home fa-lg"></i></a></li>
+        <li class="active">Static</li>
+    </ol>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <section id="categories">
+        <div class="panel-group" id="accordion">
+            <ul class="list-group">
+            {% for p in PAGES %}
+                 <li{% if p == page %} class="active"{% endif %}>
+                     <a href="{{ SITEURL }}/{{ p.url }}"> {{ p.menulabel|default(p.title) }}</a>
+                 </li>
+            {% endfor %}
+            </ul>
+        </div>
+    </section>
+{% endblock %}
