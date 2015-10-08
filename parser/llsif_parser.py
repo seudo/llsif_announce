@@ -122,6 +122,8 @@ class parser:
         if ptype == "voting":
             url = self.URL + '/webview.php/voting/detail?id=&uid=%s' %pid
             #url = self.URL + '/webview.php/voting/index?id=%s' %pid
+            #url = self.URL + "/webview.php/voting/situation?id=9&uid=3%d" %pid
+            #url = self.URL + "/webview.php/voting/detail?id=9&uid=3%d&sid=%d" %(pid, sid)
         else:
             url = self.URL + config.URI['page_detail'] %pid 
         header = self.get_header()
@@ -159,30 +161,4 @@ class parser:
         [ x.extract() for x in content.findAll('a', {'id':"back-bottom"})]
         return content
 
-
-def test():
-    index, offset = 0, 0
-    parser = parser("TW")
-
-    # 16 Normal
-    # 20 1grade
-    # 21 2grade
-    # 22 3grade
-    # 24 Smile
-    # 25 Pure
-    # 26 Cool
-    # 28 Lily White
-    # 29 Printemps
-    # 37 BiBi
-    # 38 SR & UR
-    # 39 Skill Up
-    # 40 Pick UP
-    for idx in (16,20,21,22,24,25,26,28,29,30,38,39):
-        with open('static_%d.html' %idx, 'w') as file:
-            file.write(parser.page_detail(idx).encode("utf-8"))
-
-    print parser.web_detail(2,370)
-
-    for pid,title,date,content,img,offset in parser.web_view(index, offset):
-        print pid, img
 

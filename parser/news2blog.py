@@ -7,6 +7,7 @@ import config
 import account
 import datetime as dt
 import re
+import codecs
 
 root = config.ROOT
 index_list = dict( TW = [u'公告',u'異常',u'更新'],
@@ -27,9 +28,13 @@ class Worker:
         logging.basicConfig(filename=root+"logs_%s" %version,level=logging.INFO)
         self.logger = logging.getLogger('main')
 
+    def save_file(self, filename, content):
+        with codecs.open(filename, 'w', 'utf-8') as file:
+            file.write(content)
+
     def upload_img(self, url):
         try:
-            url = "http://" + url.split('//')[1]
+            url = "http://" + '/'.join(url.split('//')[1:])
         except:
             return url
         self.logger.info("Download image file: %s" %url)
@@ -81,14 +86,13 @@ class Worker:
                 url['href'] = self.check_link(url['href'])
             except:
                 pass
-        with codecs.open(filename,'w','utf-8') as file:
-            file.write(u'Title: %s\n' %title)
-            file.write(u'Date: %s\n' %date)
-            file.write(u'Modify: %s\n' %time_now)
-            file.write(u'Slug: %s_%s\n' %(ptype,pid))
-            file.write(u'\n')
-            file.write(u'%s\n' %detail)
 
+        fileinfo = (u'Title: {0}\n'
+                    u'Date: {1}\n'
+                    u'Modify: {2}\n'
+                    u'Slug: {3}_{4}\n\n'
+                    u'{5}\n').format(title, date, time_now, ptype, pid, detail)
+        self.save_file(filename, fileinfo)
 
     def InsertNews(self):
         self.logger.info("start main() // %s" %time.strftime("%c"))
@@ -133,17 +137,17 @@ class Worker:
                         for url in detail.findAll('a'):
                             url['href'] = self.check_link(url['href'])
 
-                        with codecs.open(filename,'w','utf-8') as file:
-                            file.write(u'Title: %s\n' %title)
-                            file.write(u'Date: %s\n' %date)
-                            file.write(u'Modify: %s\n' %time_now)
-                            file.write(u'Category: %s\n' %index_type)
-                            file.write(u'Tags: POST\n' )
-                            file.write(u'Slug: announce_%s\n' %pid)
-                            file.write(u'Summary: %s\n' %content)
-                            file.write(u'\n')
-                            file.write(u'%s\n' %detail)
-                
+                        fileinfo = (
+                            u'Title: {0}\n'
+                            u'Date: {1}\n'
+                            u'Modify: {2}\n'
+                            u'Category: {3}\n'
+                            u'Tags: POST\n'
+                            u'Slug: announce_{4}\n'
+                            u'Summary: {5}\n\n'
+                            u'{6}\n').format(title, date, time_now, index_type, pid, content, detail)
+                        self.save_file(filename, fileinfo)
+
                         self.logger.info("Fetch file: %s %s success!" %(pid,title))
                         hashlist.setdefault(pid, {})
                         oslist = set(hashlist.get("oslist", []))
@@ -166,7 +170,7 @@ class Worker:
                             hashlist[pid]["modify_time"] = time_now
                     except Exception as e:
                         print str(e)
-                        self.logger.info("Error: %s %s, %s" %(pid,title,str(e)))
+                        self.logger.info("Error: {0} {1}, {2}".format(pid,title,str(e)))
                         continue
 
                 offset = int(str(offset))
